@@ -1,31 +1,33 @@
 import socket
+import datetime
+import time
 
-# conf socket
+# ------------------------------ CONSTS
+HEADERSIZE = 10
+SLEEP_TIME = 2
+BUFF_SIZE = 20
+
+# ------------------------------ VARS
+msg_full = ''
+msg_new = True
+msg_len = 0
+
+# ------------------------------ SERVER SOCKET CONFIG
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-# connect to socket, server and client are on same machine for now so gethostname can be used
 s.connect((socket.gethostname(), 1234))
 
-# determine HEADERSIZE
-HEADERSIZE = 10
-
 while True:
-    # empty variable for message
-    full_msg = ''
-    # to track if its new message or we are receing rest of the buffor
-    new_msg = True
+    msg_full = ''
+    msg_new = True
     while True:
-        msg = s.recv(16)
-        if new_msg:
-            print("new message length: {}".format(msg[:HEADERSIZE]))
-            msglen = int(msg[:HEADERSIZE])
-            new_msg = False
+        if msg_new:
+            msg_new = False
+            msg_full += s.recv(BUFF_SIZE).decode("utf-8")
+            msg_len = int(msg_full[:HEADERSIZE])
 
-        full_msg += msg.decode("utf-8")
+        msg_full += s.recv(BUFF_SIZE).decode("utf-8")
 
-        if len(full_msg)-HEADERSIZE == msglen:
-            print("full msg received")
-            print(full_msg[HEADERSIZE:])
-            new_msg = True
-            full_msg = ''
-    print(full_msg)
+        if len(msg_full) >= msg_len - HEADERSIZE:
+            msg_new = True
+            print(f"{datetime.datetime.now()}: New message from server: {msg_full[HEADERSIZE:]}")
+            msg_full = ''

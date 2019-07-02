@@ -1,33 +1,33 @@
 import socket
+import datetime
 import time
 
-# create socket
+
+def build_msg(msg, header_size):
+    return f"{len(msg):<{header_size}}"+msg
+
+
+# ------------------------------ CONSTS
+HEADERSIZE = 10
+SLEEP_TIME = 2
+
+# ------------------------------ VARS
+msg_new_client = "Welcome to server lad!"
+
+# ------------------------------ SERVER SOCKET CONFIG
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-# bind socket to local ip and 1234 port
 s.bind((socket.gethostname(), 1234))
-
-# queue
 s.listen(5)
 
-# determine headersize
-HEADERSIZE = 10
-
 while True:
-    # on connection accept and get data
+    # accept connection
     client_socket, adress = s.accept()
-
-    # print msg for debug purposes
-    print("New connection from: {}",format(adress))
-
-    # send message to the client
-    msg = "Hello new client!"
-    msg = f'{len(msg):<{HEADERSIZE}}' + msg
-
+    print(f"New connection to the server: {adress}")
+    msg = build_msg(msg_new_client, HEADERSIZE)
     client_socket.send(bytes(msg, "utf-8"))
 
     while True:
-        time.sleep(3)
-        msg = f"Time is: {time.time()}"
-        msg = f'{len(msg):<{HEADERSIZE}}' + msg
+        time.sleep(SLEEP_TIME)
+        msg = build_msg(str(datetime.datetime.now()), HEADERSIZE)
+        print(f"{datetime.datetime.now()}: Sending message to client: {adress}")
         client_socket.send(bytes(msg, "utf-8"))
