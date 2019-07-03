@@ -19,5 +19,22 @@ sockets_list = [server_socket]
 clients = {}
 
 
+def receive_message(client_socket):
+    try:
+        msg_header = client_socket.recv(HEADER_SIZE)
 
+        if not len(msg_header):
+            return False
+
+        msg_length = int(msg_header.decode("utf-8"))
+        msg = client_socket.recv(msg_length)
+
+        return {"header": msg_header, "data": msg}
+
+    except:
+        return False
+
+
+while True:
+    pass
 
