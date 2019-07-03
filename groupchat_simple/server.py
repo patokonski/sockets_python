@@ -1,6 +1,8 @@
 import socket
 import select
 
+# TODO: need to be tested after client implementation
+
 # CONSTS
 HEADER_SIZE = 10
 LISTEN_QUEUE = 5
@@ -36,5 +38,37 @@ def receive_message(client_socket):
 
 
 while True:
-    pass
+    read_sockets, _, exception_sockets = select.select(sockets_list, [], sockets_list)
+
+    for socketn in read_sockets:
+        if socketn == server_socket:
+            client_socket, client_address = server_socket.accept()
+            user = receive_message(client_socket)
+
+            if user is False:
+                continue
+
+            sockets_list.append(client_socket)
+            clients[client_socket] = user
+
+            print(f"New connection accepted. IP: {client_address}, username: {user['data'].decode('utf-8')}")
+
+        else:
+            message = receive_message(socketn)
+            if message is False:
+                print(f"Closed connection from {clients[socketn]['data'].decode('utf-8')}")
+                sockets_list.remove(socketn)
+                del clients[socketn]
+                continue
+
+            user = clients[socketn]
+            print(f"Received message from {user['data'].decode('utf-8')}: {message['data'].decode('utf-8')}")
+
+            for csocket in clients:
+                if csocket != socketn:
+                    csocket.send(user['header'] + user['data'] + message['header'] + message['data'])
+
+    for socketn in exception_sockets:
+        sockets_list.remove(socketn)
+        del clients[socketn]
 
