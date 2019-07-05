@@ -42,6 +42,7 @@ clients = {}
 while True:
     read_sockets, _, exception_sockets = select.select(sockets_list, [], sockets_list)
     for r_socket in read_sockets:
+        # handle new connection to the server
         if r_socket == server_socket:
             client_socket, client_address = server_socket.accept()
             user = receive_message(client_socket)
@@ -51,6 +52,7 @@ while True:
             sockets_list.append(client_socket)
             clients[client_socket] = user
             print(f"{datetime.now()}: New client connected to the server from {client_address[0]}{client_address[1]}. Username: {user['data'].decode('utf8')}")
+        # handle new message from the client
         else:
             message = receive_message(r_socket)
             if not message:

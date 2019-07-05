@@ -1,2 +1,2 @@
 # Groupchat-simple
-Simple server-clients chatroom app.
+Really simple server-client group chat app.
